@@ -13,6 +13,9 @@ const exec = util.promisify(child_process.exec)
 function isStdError(error: any): error is { stderr: string } {
     return !!error.stderr
 }
+function escapeString(value: string): string {
+    return value.replace(/["\\']/g, '\\$&')
+}
 
 try {
 
@@ -96,7 +99,7 @@ try {
     const authProgress = new clui.Spinner('Authenticating you, please wait...')
     authProgress.start()
     try {
-        await exec('cf auth \"' + btpCredentials[1].slice(10) + '\" \"' + btpCredentials[0] + '\"')
+        await exec('cf auth \"' + btpCredentials[1].slice(10) + '\" \"' + escapeString(btpCredentials[0]) + '\"')
     } catch (error) {
         if (isStdError(error) && JSON.parse(error.stderr).error === 'invalid_grant') {
             throw JSON.parse(error.stderr).error_description
